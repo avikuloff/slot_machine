@@ -3,19 +3,68 @@ use crate::game::{Bet, Game};
 pub mod game;
 
 fn main() {
-    let bet = Bet::new(1, 1, 100);
-    let mut game = Game::new(10, bet);
-    for _i in 0..100 {
-        if let Err(e) = game.spin() {
-            println!("{}", e);
-            break;
-        }
+    let balance = 1000;
+    let bet_size = 1;
+    let bet_min = 1;
+    let bet_max = 100;
 
-        if game.win() > 0 {
-            println!("You WIN! {} : {:?}", game.win(), game.symbols());
+    println!("Greetings!");
+
+    println!("Your balance: {} credits", balance);
+    println!("Bet size: {}", bet_size);
+    println!("To get a balance, put the `balance`");
+    println!("To get a bet size, put the `bet`");
+    println!("To increase or decrease the size of the bet, put `bet plus` or `bet minus`.");
+
+    let bet = Bet::new(bet_size, bet_min, bet_max);
+    let mut game = Game::new(balance, bet);
+
+    loop {
+        let mut command = String::new();
+
+        std::io::stdin()
+            .read_line(&mut command)
+            .expect("Failed to read command!");
+
+        match command.trim().to_uppercase().as_str() {
+            "BALANCE" => println!("Your balance: {} credits.", game.credits()),
+            "BET" => println!("Current bet: {} credits.", game.bet_size()),
+            "BET PLUS" => {
+                bet_plus(&mut game);
+                println!("Bet size: {}.", game.bet_size());
+            },
+            "BET MINUS" => {
+                bet_minus(&mut game);
+                println!("Bet size: {}.", game.bet_size());
+            },
+            "SPIN" => {
+                if let Ok(_) = game.spin() {
+                    println!("{:?}", game.symbols());
+                    println!("You win {} credits", game.win());
+                }
+            }
+            _ => println!("Invalid command!")
         }
     }
+}
 
-    println!("Hello, world! {:?}", game.to_json());
+fn bet_plus(game: &mut Game) {
+    match game.bet_size() {
+        1 => game.set_bet_size(2),
+        2 => game.set_bet_size(3),
+        3 => game.set_bet_size(5),
+        5 => game.set_bet_size(10),
+        _ => println!("Invalid bet size!")
+    }
+}
+
+fn bet_minus(game: &mut Game) {
+    match game.bet_size() {
+        10 => game.set_bet_size(5),
+        5 => game.set_bet_size(3),
+        3 => game.set_bet_size(2),
+        2 => game.set_bet_size(1),
+        _ => println!("Invalid bet size!")
+    }
 }
 
