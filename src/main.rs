@@ -2,20 +2,20 @@ use crate::game::{Bet, Game};
 
 pub mod game;
 
-fn main() {
-    let balance = 1000;
-    let bet_size = 1;
-    let bet_min = 1;
-    let bet_max = 100;
+const BALANCE: u32 = 1000;
+const BET_SIZE: u32 = 1;
+const BET_MIN: u32 = 1;
+const BET_MAX: u32 = 10;
 
+fn main() {
     println!("Greetings!");
 
-    println!("Your balance: {} credits", balance);
-    println!("Bet size: {}", bet_size);
+    println!("Your balance: {} credits", BALANCE);
+    println!("Bet size: {}", BET_SIZE);
     print_help();
 
-    let bet = Bet::new(bet_size, bet_min, bet_max);
-    let mut game = Game::new(balance, bet);
+    let bet = Bet::new(BET_SIZE, BET_MIN, BET_MAX);
+    let mut game = Game::new(BALANCE, bet);
 
     loop {
         let mut command = String::new();
@@ -61,7 +61,7 @@ fn bet_plus(game: &mut Game) -> Result<u32, String> {
         2 => 3,
         3 => 5,
         5 => 10,
-        10 => return Err("Max bet size!".to_owned()),
+        BET_MAX => return Err("Max bet size!".to_owned()),
         _ => return Err("Invalid bet size!".to_owned())
     };
 
@@ -77,7 +77,7 @@ fn bet_minus(game: &mut Game) -> Result<u32, String> {
         5 => 3,
         3 => 2,
         2 => 1,
-        1 => return Err("Min bet size!".to_owned()),
+        BET_MIN => return Err("Min bet size!".to_owned()),
         _ => return Err("Invalid bet size!".to_owned())
     };
 
