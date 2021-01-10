@@ -1,4 +1,6 @@
 use crate::game::{Bet, Game};
+use std::thread::sleep;
+use std::time::Duration;
 
 pub mod game;
 
@@ -39,18 +41,30 @@ fn main() {
                     Err(e) => println!("{}", e)
                 }
             },
-            "SPIN" => {
-                match game.spin() {
-                    Ok(_) => {
-                        println!("{:?}", game.symbols());
-                        println!("You win {} credits", game.win());
-                    }
-                    Err(e) => println!("{}", e.to_owned())
+            "SPIN" => spin(&mut game),
+            val if val.starts_with("AUTOSPIN") => {
+                let split = val.split(" ");
+
+                let number_spins =  split.last().unwrap().parse::<u32>().unwrap();
+
+                for _ in 0..number_spins {
+                    spin(&mut game);
+                    sleep(Duration::from_secs(1));
                 }
-            }
+            },
             "HELP" => print_help(),
             _ => println!("Invalid command!")
         }
+    }
+}
+
+fn spin(game: &mut Game) {
+    match game.spin() {
+        Ok(_) => {
+            println!("{:?}", game.symbols());
+            println!("You win {} credits", game.win());
+        }
+        Err(e) => println!("{}", e.to_owned())
     }
 }
 
@@ -88,8 +102,9 @@ fn bet_minus(game: &mut Game) -> Result<u32, String> {
 
 // Prints help text
 fn print_help() {
-    println!("To get a balance, put the `balance`");
-    println!("To get a bet size, put the `bet`");
+    println!("To get a balance, put the `balance`.");
+    println!("To get a bet size, put the `bet`.");
     println!("To increase or decrease the size of the bet, put `bet plus` or `bet minus`.");
+    println!("To activate auto-spin, put `autospin <NUMBER>` where NUMBER is the number of spins.")
 }
 
