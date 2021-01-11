@@ -45,6 +45,7 @@ impl Game {
     ///
     /// # Examples
     /// ```
+    /// # use slot_machine::game::{Game, Bet};
     /// let game = Game::new(1000, Bet::new(1, 1, 100));
     /// ```
     pub fn new(credits: u32, bet: Bet) -> Game {
@@ -67,6 +68,7 @@ impl Game {
     ///
     /// # Examples
     /// ```
+    /// # use slot_machine::game::{Game, Bet};
     /// let mut game = Game::new(1000, Bet::new(10, 1, 100));
     /// game.set_bet_size(15);
     ///
@@ -102,6 +104,7 @@ impl Game {
     /// # Examples
     ///
     /// ```
+    /// # use slot_machine::game::{Game, Bet};
     /// let mut game = Game::new(1000, Bet::new(1, 1, 100));
     /// game.spin().unwrap();
     ///
@@ -196,6 +199,7 @@ impl Bet {
     /// # Examples
     ///
     /// ```
+    /// # use slot_machine::game::Bet;
     /// assert!(Bet::is_valid(1, 1, 1));
     ///
     /// // bet > max

@@ -38,6 +38,7 @@ impl Symbol {
     ///
     /// # Examples
     /// ```
+    /// # use slot_machine::game::symbol::Symbol;
     /// let symbol = Symbol::from_number(125);
     /// assert_eq!(Symbol::Seven, symbol)
     /// ```
@@ -63,6 +64,7 @@ impl Symbol {
     /// # Examples
     ///
     /// ```
+    /// # use slot_machine::game::symbol::Symbol;
     /// let symbol = Symbol::random();
     /// ```
     pub fn random() -> Symbol {

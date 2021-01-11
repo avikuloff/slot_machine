@@ -1,8 +1,8 @@
-use crate::game::{Bet, Game};
+// Simple text-based user interface
+
+use slot_machine::game::{Bet, Game};
 use std::thread::sleep;
 use std::time::Duration;
-
-pub mod game;
 
 const BALANCE: u32 = 1000;
 const BET_SIZE: u32 = 1;
@@ -29,31 +29,27 @@ fn main() {
         match command.trim().to_uppercase().as_str() {
             "BALANCE" => println!("Your balance: {} credits.", game.credits()),
             "BET" => println!("Current bet: {} credits.", game.bet_size()),
-            "BET PLUS" => {
-                match bet_plus(&mut game) {
-                    Ok(val) => println!("Bet size: {}.", val),
-                    Err(e) => println!("{}", e)
-                }
+            "BET PLUS" => match bet_plus(&mut game) {
+                Ok(val) => println!("Bet size: {}.", val),
+                Err(e) => println!("{}", e),
             },
-            "BET MINUS" => {
-                match bet_minus(&mut game) {
-                    Ok(val) => println!("Bet size: {}.", val),
-                    Err(e) => println!("{}", e)
-                }
+            "BET MINUS" => match bet_minus(&mut game) {
+                Ok(val) => println!("Bet size: {}.", val),
+                Err(e) => println!("{}", e),
             },
             "SPIN" => spin(&mut game),
             val if val.starts_with("AUTOSPIN") => {
                 let split = val.split(" ");
 
-                let number_spins =  split.last().unwrap().parse::<u32>().unwrap();
+                let number_spins = split.last().unwrap().parse::<u32>().unwrap();
 
                 for _ in 0..number_spins {
                     spin(&mut game);
                     sleep(Duration::from_secs(1));
                 }
-            },
+            }
             "HELP" => print_help(),
-            _ => println!("Invalid command!")
+            _ => println!("Invalid command!"),
         }
     }
 }
@@ -64,7 +60,7 @@ fn spin(game: &mut Game) {
             println!("{:?}", game.symbols());
             println!("You win {} credits", game.win());
         }
-        Err(e) => println!("{}", e.to_owned())
+        Err(e) => println!("{}", e.to_owned()),
     }
 }
 
@@ -76,7 +72,7 @@ fn bet_plus(game: &mut Game) -> Result<u32, String> {
         3 => 5,
         5 => 10,
         BET_MAX => return Err("Max bet size!".to_owned()),
-        _ => return Err("Invalid bet size!".to_owned())
+        _ => return Err("Invalid bet size!".to_owned()),
     };
 
     game.set_bet_size(bet_size);
@@ -92,7 +88,7 @@ fn bet_minus(game: &mut Game) -> Result<u32, String> {
         3 => 2,
         2 => 1,
         BET_MIN => return Err("Min bet size!".to_owned()),
-        _ => return Err("Invalid bet size!".to_owned())
+        _ => return Err("Invalid bet size!".to_owned()),
     };
 
     game.set_bet_size(bet_size);
@@ -107,4 +103,3 @@ fn print_help() {
     println!("To increase or decrease the size of the bet, put `bet plus` or `bet minus`.");
     println!("To activate auto-spin, put `autospin <NUMBER>` where NUMBER is the number of spins.")
 }
-
