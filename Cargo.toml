@@ -2,6 +2,13 @@
 name = "slot_machine"
 version = "0.1.0"
 authors = ["Andrey Vikulov <avikuloff@yandex.ru>"]
+license = "MIT OR Apache-2.0"
+description = "Bluejay Bonanza Slot Machine"
+keywords = ["game engine", "slot machine"]
+categories = ["game-engines"]
+repository = "https://github.com/avikuloff/slot-machine/"
+documentation = "https://docs.rs/slot_machine"
+readme = "README.md"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
