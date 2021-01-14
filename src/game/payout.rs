@@ -2,16 +2,16 @@ use crate::game::symbol::Symbol;
 use crate::game::symbol::Symbol::*;
 use crate::game::NUM_REELS;
 
-/// Рассчитывает выплату.
+/// Calculates payout.
 ///
 /// # Panics
 ///
-/// The `payout` function will panic if the number of elements in the vector is not 3.
+/// Panics if the number of elements in the `symbols` is not 3.
 pub fn payout(symbols: &Vec<Symbol>) -> u32 {
     assert_eq!(
         symbols.len(),
         NUM_REELS,
-        "Вектор должен содержать {} символа! Содержит: {}",
+        "`symbols` must contain {} symbols! Contains: {}",
         NUM_REELS,
         symbols.len()
     );
@@ -44,7 +44,7 @@ pub fn payout(symbols: &Vec<Symbol>) -> u32 {
     0
 }
 
-/// Возвращает `true` если `vec` содержит только `expected`
+// Returns `true` if `vec` contains the same symbols.
 fn is_all(vec: &Vec<Symbol>, expected: Symbol) -> bool {
     vec.iter().all(|x| x == &expected)
 }

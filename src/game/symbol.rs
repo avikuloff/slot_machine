@@ -7,9 +7,10 @@ use rand::Rng;
 use serde_derive::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
 
-/// Допустимый диапазон чисел, для которых есть соответствующие символы.
+/// The range of numbers for which there are corresponding symbols.
 pub const RANGE: RangeInclusive<u32> = 0..=127;
 
+/// Symbols
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Symbol {
     Blank,
@@ -28,11 +29,11 @@ impl fmt::Display for Symbol {
 }
 
 impl Symbol {
-    /// Возвращает соответствующий символ для числа из диапазона [`RANGE`].
+    /// Searches for the corresponding [`Symbol`] in the range [`RANGE`] for `number`.
     ///
     /// # Panics
     ///
-    /// Паникует если число не входит в диапазон [`RANGE`].
+    /// Panics if the `numbe`r is not in the [`RANGE`].
     ///
     /// [`RANGE`]: ../symbol/constant.RANGE.html
     ///
@@ -52,14 +53,14 @@ impl Symbol {
             _n @ 118..=125 => Seven,
             _n @ 126..=127 => Jackpot,
             _ => panic!(
-                "Число не входит в диапазон {}..={}!",
+                "The number is not in the range {}..={}!",
                 RANGE.start(),
                 RANGE.end()
             ),
         }
     }
 
-    /// Возвращает случайный символ
+    /// Returns a random [`Symbol`]
     ///
     /// # Examples
     ///

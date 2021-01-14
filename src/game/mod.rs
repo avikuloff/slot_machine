@@ -7,7 +7,7 @@ use std::fmt;
 pub mod payout;
 pub mod symbol;
 
-/// Количество барабанов в слот машине
+/// Number of virtual reels in a slot machine
 pub const NUM_REELS: usize = 3;
 
 #[derive(Debug, Clone)]
@@ -17,10 +17,11 @@ impl Error for InvalidBet {}
 
 impl fmt::Display for InvalidBet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Недопустимый размер ставки!")
+        write!(f, "Invalid bet!")
     }
 }
 
+/// This error occurs if there are not enough credits on the balance
 #[derive(Debug, Clone)]
 pub struct LowBalance;
 
@@ -28,10 +29,11 @@ impl Error for LowBalance {}
 
 impl fmt::Display for LowBalance {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Недостаточно средств на балансе!")
+        write!(f, "Insufficient credits on the balance!")
     }
 }
 
+/// Game state
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Game {
     credits: u32,
@@ -41,12 +43,12 @@ pub struct Game {
 }
 
 impl Game {
-    /// Game constructor
+    /// Creates new [`Game`] instance. Initial symbols are set randomly, the winnings are 0.
     ///
     /// # Examples
     /// ```
     /// # use slot_machine::game::{Game, Bet};
-    /// let game = Game::new(1000, Bet::new(1, 1, 100));
+    /// Game::new(1000, Bet::new(1, 1, 100));
     /// ```
     pub fn new(credits: u32, bet: Bet) -> Game {
         let stops = vec![Symbol::random(), Symbol::random(), Symbol::random()];
@@ -64,7 +66,7 @@ impl Game {
         self.bet = bet;
     }
 
-    /// Устанавливает размер ставки
+    /// Sets the bet size in credits
     ///
     /// # Examples
     /// ```
@@ -78,28 +80,28 @@ impl Game {
         self.bet.set_size(bet_size)
     }
 
-    /// Возвращает размер ставки
+    /// Returns the bet size in credits
     pub fn bet_size(&self) -> u32 {
         self.bet.size
     }
 
-    /// Возврашает количество кредитов на счету
+    /// Returns the number of credits in the balance
     pub fn credits(&self) -> u32 {
         self.credits
     }
 
-    /// Возврашает размер последнего выигрыша
+    /// Returns the amount of the last win
     pub fn win(&self) -> u32 {
         self.win
     }
 
-    /// Символы на барабанах
+    /// Symbols on the reels
     pub fn symbols(&self) -> Vec<Symbol> {
         self.stops.clone()
     }
 
-    /// Симулирует вращение барабанов слот машины. Результатом вращения является изменение
-    /// количества кредитов, размера выигрыша и символов,
+    /// Simulates the rotation of the reels slot machine.
+    /// The result of rotation is a change in the number of credits, the amount of winnings and symbols on the reels.
     ///
     /// # Examples
     ///
@@ -108,12 +110,12 @@ impl Game {
     /// let mut game = Game::new(1000, Bet::new(1, 1, 100));
     /// game.spin().unwrap();
     ///
-    /// assert_eq!(game.credits(), 999);
+    /// assert_eq!(game.credits(), game.credits() + game.win());
     /// ```
     ///
     /// # Errors
     ///
-    /// Возвращает [`LowBalance`] если количество кредитов на счету [`credits`] меньше размера ставки [`bet_size`].
+    /// Returns [`LowBalance`] if the number of credits in the balance [`credits`] is less than the bet size [`bet_size`].
     ///
     /// [`credits`]: #method.credits
     /// [`bet_size`]: #method.bet_size
@@ -136,6 +138,7 @@ impl Game {
         Ok(())
     }
 
+    /// Converts an instance to a Json object
     pub fn to_json(&self) -> String {
         serde_json::to_string(self).unwrap()
     }
@@ -143,18 +146,20 @@ impl Game {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Bet {
-    /// Размер ставки
+    /// Bet size
     pub size: u32,
+    /// Minimum allowable bet
     min: u32,
+    /// Maximum allowable bet
     max: u32,
 }
 
 impl Bet {
-    /// Конструктор
+    /// Creates new [`Bet`] instance.
     ///
     /// # Panics
     ///
-    /// Паникует если `size < min` или `size > max` или `min > max`, проверяется функцией [`is_valid`].
+    /// Panics if `size < min` or `size > max` or `min > max`, checked by function [`is_valid`].
     ///
     /// [`is_valid`]: #method.is_valid
     pub fn new(size: u32, min: u32, max: u32) -> Bet {
@@ -163,11 +168,11 @@ impl Bet {
         Bet { size, min, max }
     }
 
-    /// Устанавливает размер ставки
+    /// Sets the bet size in credits
     ///
     /// # Panics
     ///
-    /// Паникует если `size` меньше [`min`] или больше [`max`], проверяется функцией [`is_valid`].
+    /// Panic if `size` is less than [`min`] or greater than [`max`], checked by function [`is_valid`].
     ///
     /// [`min`]: #method.min
     /// [`max`]: #method.max
@@ -181,28 +186,28 @@ impl Bet {
         self.size = size
     }
 
-    /// Возвращает минимально допустимый размер ставки
+    /// Returns the minimum allowable bet
     pub fn min(&self) -> u32 {
         self.min
     }
 
-    /// Возвращает максимально допустимый размер ставки
+    /// Returns the maximum allowable bet
     pub fn max(&self) -> u32 {
         self.max
     }
 
-    /// Проверяет значения на валидность.
+    /// Validates the values of [`Bet`].
     ///
-    /// Возвращает `true` если удовлетворены все 3 условия: `bet >= min`, `bet <= max`, `min <= max`.
-    /// В противном случае вернет `false`.
+    /// Returns `true` if all 3 conditions are satisfied: `bet >= min`, `bet <= max`, `min <= max`, otherwise it returns `false`.
     ///
     /// # Examples
     ///
     /// ```
     /// # use slot_machine::game::Bet;
+    /// // Valid Bet
     /// assert!(Bet::is_valid(1, 1, 1));
     ///
-    /// // bet > max
+    /// // Invalid Bet (bet > max)
     /// assert!(! Bet::is_valid(10, 1, 5));
     /// ```
     pub fn is_valid(bet: u32, min: u32, max: u32) -> bool {
