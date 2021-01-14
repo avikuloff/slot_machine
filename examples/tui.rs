@@ -1,6 +1,6 @@
 // Simple text-based user interface
 
-use slot_machine::game::{Bet, Game};
+use slot_machine::game::Game;
 use std::thread::sleep;
 use std::time::Duration;
 
@@ -16,8 +16,8 @@ fn main() {
     println!("Bet size: {}", BET_SIZE);
     print_help();
 
-    let bet = Bet::new(BET_SIZE, BET_MIN, BET_MAX);
-    let mut game = Game::new(BALANCE, bet);
+    //let bet = Bet::new(BET_SIZE, BET_MIN, BET_MAX);
+    let mut game = Game::new(BALANCE, BET_SIZE, BET_MIN, BET_MAX).unwrap();
 
     loop {
         let mut command = String::new();
@@ -28,7 +28,7 @@ fn main() {
 
         match command.trim().to_uppercase().as_str() {
             "BALANCE" => println!("Your balance: {} credits.", game.credits()),
-            "BET" => println!("Current bet: {} credits.", game.bet_size()),
+            "BET" => println!("Current bet: {} credits.", game.bet()),
             "BET PLUS" => match bet_plus(&mut game) {
                 Ok(val) => println!("Bet size: {}.", val),
                 Err(e) => println!("{}", e),
@@ -67,7 +67,7 @@ fn spin(game: &mut Game) {
 
 // Increase bet size
 fn bet_plus(game: &mut Game) -> Result<u32, String> {
-    let bet_size = match game.bet_size() {
+    let bet_size = match game.bet() {
         1 => 2,
         2 => 3,
         3 => 5,
@@ -76,14 +76,14 @@ fn bet_plus(game: &mut Game) -> Result<u32, String> {
         _ => return Err("Invalid bet size!".to_owned()),
     };
 
-    game.set_bet_size(bet_size);
+    game.set_bet(bet_size);
 
     Ok(bet_size)
 }
 
 // Decrease bet size
 fn bet_minus(game: &mut Game) -> Result<u32, String> {
-    let bet_size = match game.bet_size() {
+    let bet_size = match game.bet() {
         10 => 5,
         5 => 3,
         3 => 2,
@@ -92,7 +92,7 @@ fn bet_minus(game: &mut Game) -> Result<u32, String> {
         _ => return Err("Invalid bet size!".to_owned()),
     };
 
-    game.set_bet_size(bet_size);
+    game.set_bet(bet_size);
 
     Ok(bet_size)
 }

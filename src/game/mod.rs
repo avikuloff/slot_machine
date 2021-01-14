@@ -11,13 +11,15 @@ pub mod symbol;
 pub const NUM_REELS: usize = 3;
 
 #[derive(Debug, Clone)]
-pub struct InvalidBet;
+pub struct InvalidBet {
+    message: String,
+}
 
 impl Error for InvalidBet {}
 
 impl fmt::Display for InvalidBet {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Invalid bet!")
+        write!(f, "{}", self.message)
     }
 }
 
@@ -37,7 +39,9 @@ impl fmt::Display for LowBalance {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Game {
     credits: u32,
-    bet: Bet,
+    bet: u32,
+    bet_min: u32,
+    bet_max: u32,
     win: u32,
 }
 
@@ -46,39 +50,53 @@ impl Game {
     ///
     /// # Examples
     /// ```
-    /// # use slot_machine::game::{Game, Bet};
-    /// Game::new(1000, Bet::new(1, 1, 100));
+    /// # use slot_machine::game::Game;
+    /// Game::new(1000, 1, 1, 100);
     /// ```
-    pub fn new(credits: u32, bet: Bet) -> Game {
-        Game {
+    pub fn new(credits: u32, bet: u32, bet_min: u32, bet_max: u32) -> Result<Self, InvalidBet> {
+        if bet_min > bet_max {
+            return Err(InvalidBet {
+                message: "bet_min > bet_max".to_owned(),
+            });
+        }
+        if bet < bet_min {
+            return Err(InvalidBet {
+                message: "bet < bet_min".to_owned(),
+            });
+        }
+        if bet > bet_max {
+            return Err(InvalidBet {
+                message: "bet > bet_max".to_owned(),
+            });
+        }
+
+        Ok(Game {
             credits,
             bet,
+            bet_min,
+            bet_max,
             win: 0,
-        }
+        })
     }
 
     /// Bet setter.
-    pub fn set_bet(&mut self, bet: Bet) {
+    pub fn set_bet(&mut self, bet: u32) {
         self.bet = bet;
     }
 
-    /// Sets the bet size in credits
-    ///
-    /// # Examples
-    /// ```
-    /// # use slot_machine::game::{Game, Bet};
-    /// let mut game = Game::new(1000, Bet::new(10, 1, 100));
-    /// game.set_bet_size(15);
-    ///
-    /// assert_eq!(game.bet_size(), 15)
-    /// ```
-    pub fn set_bet_size(&mut self, bet_size: u32) {
-        self.bet.set_size(bet_size)
+    /// Returns the bet size in credits
+    pub fn bet(&self) -> u32 {
+        self.bet
     }
 
-    /// Returns the bet size in credits
-    pub fn bet_size(&self) -> u32 {
-        self.bet.size
+    /// Returns the minimum allowable bet
+    pub fn min(&self) -> u32 {
+        self.bet_min
+    }
+
+    /// Returns the maximum allowable bet
+    pub fn max(&self) -> u32 {
+        self.bet_max
     }
 
     /// Returns the number of credits in the balance
@@ -103,8 +121,8 @@ impl Game {
     /// # Examples
     ///
     /// ```
-    /// # use slot_machine::game::{Game, Bet};
-    /// let mut game = Game::new(1000, Bet::new(1, 1, 100));
+    /// # use slot_machine::game::Game;
+    /// let mut game = Game::new(1000, 1, 1, 100).unwrap();
     /// game.spin().unwrap();
     ///
     /// assert_eq!(game.credits(), game.credits() + game.win());
@@ -113,7 +131,7 @@ impl Game {
     /// [`credits`]: #method.credits
     /// [`bet_size`]: #method.bet_size
     pub fn spin(&mut self) -> Result<Vec<Symbol>, LowBalance> {
-        if self.credits() < self.bet_size() {
+        if self.credits() < self.bet() {
             return Err(LowBalance);
         }
 
@@ -123,8 +141,8 @@ impl Game {
             stops.push(Symbol::random());
         }
 
-        self.credits -= self.bet_size();
-        self.win = payout(&stops) * self.bet_size();
+        self.credits -= self.bet();
+        self.win = payout(&stops) * self.bet();
         self.credits += self.win;
 
         Ok(stops)
@@ -133,80 +151,5 @@ impl Game {
     /// Converts an instance to a Json object
     pub fn to_json(&self) -> String {
         serde_json::to_string(self).unwrap()
-    }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Bet {
-    /// Bet size
-    pub size: u32,
-    /// Minimum allowable bet
-    min: u32,
-    /// Maximum allowable bet
-    max: u32,
-}
-
-impl Bet {
-    /// Creates new [`Bet`] instance.
-    ///
-    /// # Panics
-    ///
-    /// Panics if `size < min` or `size > max` or `min > max`, checked by function [`is_valid`].
-    ///
-    /// [`is_valid`]: #method.is_valid
-    pub fn new(size: u32, min: u32, max: u32) -> Bet {
-        assert!(Bet::is_valid(size, min, max), InvalidBet.to_string());
-
-        Bet { size, min, max }
-    }
-
-    /// Sets the bet size in credits
-    ///
-    /// # Panics
-    ///
-    /// Panic if `size` is less than [`min`] or greater than [`max`], checked by function [`is_valid`].
-    ///
-    /// [`min`]: #method.min
-    /// [`max`]: #method.max
-    /// [`is_valid`]: #method.is_valid
-    pub fn set_size(&mut self, size: u32) {
-        assert!(
-            Bet::is_valid(size, self.min(), self.max()),
-            InvalidBet.to_string()
-        );
-
-        self.size = size
-    }
-
-    /// Returns the minimum allowable bet
-    pub fn min(&self) -> u32 {
-        self.min
-    }
-
-    /// Returns the maximum allowable bet
-    pub fn max(&self) -> u32 {
-        self.max
-    }
-
-    /// Validates the values of [`Bet`].
-    ///
-    /// Returns `true` if all 3 conditions are satisfied: `bet >= min`, `bet <= max`, `min <= max`, otherwise it returns `false`.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use slot_machine::game::Bet;
-    /// // Valid Bet
-    /// assert!(Bet::is_valid(1, 1, 1));
-    ///
-    /// // Invalid Bet (bet > max)
-    /// assert!(! Bet::is_valid(10, 1, 5));
-    /// ```
-    pub fn is_valid(bet: u32, min: u32, max: u32) -> bool {
-        if bet >= min && bet <= max && min <= max {
-            return true;
-        }
-
-        false
     }
 }
