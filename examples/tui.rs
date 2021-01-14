@@ -76,7 +76,7 @@ fn bet_plus(game: &mut Game) -> Result<u32, String> {
         _ => return Err("Invalid bet size!".to_owned()),
     };
 
-    game.set_bet(bet_size);
+    game.set_bet(bet_size).unwrap();
 
     Ok(bet_size)
 }
@@ -92,7 +92,7 @@ fn bet_minus(game: &mut Game) -> Result<u32, String> {
         _ => return Err("Invalid bet size!".to_owned()),
     };
 
-    game.set_bet(bet_size);
+    game.set_bet(bet_size).unwrap();
 
     Ok(bet_size)
 }
