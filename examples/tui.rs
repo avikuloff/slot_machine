@@ -55,9 +55,10 @@ fn main() {
 }
 
 fn spin(game: &mut Game) {
-    match game.spin() {
-        Ok(_) => {
-            println!("{:?}", game.symbols());
+    let symbols = game.spin();
+    match symbols {
+        Ok(val) => {
+            println!("{:?}", val);
             println!("You win {} credits", game.win());
         }
         Err(e) => println!("{}", e.to_owned()),

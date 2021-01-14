@@ -39,11 +39,10 @@ pub struct Game {
     credits: u32,
     bet: Bet,
     win: u32,
-    stops: Vec<Symbol>,
 }
 
 impl Game {
-    /// Creates new [`Game`] instance. Initial symbols are set randomly, the winnings are 0.
+    /// Creates new [`Game`] instance. The winnings are 0.
     ///
     /// # Examples
     /// ```
@@ -51,13 +50,10 @@ impl Game {
     /// Game::new(1000, Bet::new(1, 1, 100));
     /// ```
     pub fn new(credits: u32, bet: Bet) -> Game {
-        let stops = vec![Symbol::random(), Symbol::random(), Symbol::random()];
-
         Game {
             credits,
             bet,
             win: 0,
-            stops,
         }
     }
 
@@ -95,13 +91,14 @@ impl Game {
         self.win
     }
 
-    /// Symbols on the reels
-    pub fn symbols(&self) -> Vec<Symbol> {
-        self.stops.clone()
-    }
-
     /// Simulates the rotation of the reels slot machine.
-    /// The result of rotation is a change in the number of credits, the amount of winnings and symbols on the reels.
+    ///
+    /// Returns symbols on the reels.
+    /// Also changes state of the [`Game`] depending on the size of the bet and winnings.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`LowBalance`] if the number of credits in the balance [`credits`] is less than the bet size [`bet_size`].
     ///
     /// # Examples
     ///
@@ -113,13 +110,9 @@ impl Game {
     /// assert_eq!(game.credits(), game.credits() + game.win());
     /// ```
     ///
-    /// # Errors
-    ///
-    /// Returns [`LowBalance`] if the number of credits in the balance [`credits`] is less than the bet size [`bet_size`].
-    ///
     /// [`credits`]: #method.credits
     /// [`bet_size`]: #method.bet_size
-    pub fn spin(&mut self) -> Result<(), LowBalance> {
+    pub fn spin(&mut self) -> Result<Vec<Symbol>, LowBalance> {
         if self.credits() < self.bet_size() {
             return Err(LowBalance);
         }
@@ -130,12 +123,11 @@ impl Game {
             stops.push(Symbol::random());
         }
 
-        self.stops = stops;
         self.credits -= self.bet_size();
-        self.win = payout(&self.stops) * self.bet_size();
+        self.win = payout(&stops) * self.bet_size();
         self.credits += self.win;
 
-        Ok(())
+        Ok(stops)
     }
 
     /// Converts an instance to a Json object
