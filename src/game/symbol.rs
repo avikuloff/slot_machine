@@ -45,9 +45,9 @@ impl fmt::Display for Symbol {
 impl Symbol {
     /// Searches for the corresponding [`Symbol`] in the range [`RANGE`] for `number`.
     ///
-    /// # Panics
+    /// # Errors
     ///
-    /// Panics if the `numbe`r is not in the [`RANGE`].
+    /// Returns [`OutOfRange`] if the `number` is not in the [`RANGE`].
     ///
     /// [`RANGE`]: ../symbol/constant.RANGE.html
     ///
@@ -135,7 +135,10 @@ mod test {
     }
 
     #[test]
-    fn invalid_from_number() {
-        assert!(Symbol::from_number(128).is_err());
+    fn from_number_assert_error() {
+        assert_eq!(
+            Symbol::from_number(128).unwrap_err().to_string(),
+            "Number 128 is not in the range 0..=127".to_owned()
+        );
     }
 }

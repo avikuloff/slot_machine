@@ -72,4 +72,11 @@ mod test {
     fn payout_vec_length_not_3() {
         payout(&vec![Bar, Blank, Blank, Bar]);
     }
+
+    #[test]
+    fn test_is_all() {
+        let cherries = vec![Cherry, Cherry, Cherry];
+
+        assert!(is_all(&cherries, Cherry));
+    }
 }

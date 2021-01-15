@@ -30,7 +30,7 @@ impl fmt::Display for InvalidBet {
         } else if self.bet > self.bet_max {
             message = "bet > bet_max";
         } else {
-            panic!("Unknown error!");
+            panic!("Unprocessed condition!");
         }
 
         write!(f, "{}", message)
@@ -52,10 +52,15 @@ impl fmt::Display for LowBalance {
 /// Game state
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Game {
+    /// Balance
     credits: u32,
+    /// Actual bet size
     bet: u32,
+    /// Minimum bet size
     bet_min: u32,
+    /// Maximum bet size
     bet_max: u32,
+    /// The amount of the last win
     win: u32,
 }
 
@@ -135,7 +140,7 @@ impl Game {
     ///
     /// # Errors
     ///
-    /// Returns [`LowBalance`] if the number of credits in the balance [`credits`] is less than the bet size [`bet_size`].
+    /// Returns [`LowBalance`] if the number of credits in the balance [`credits`] is less than the bet size [`bet`].
     ///
     /// # Examples
     ///
@@ -148,7 +153,7 @@ impl Game {
     /// ```
     ///
     /// [`credits`]: #method.credits
-    /// [`bet_size`]: #method.bet_size
+    /// [`bet`]: #method.bet
     pub fn spin(&mut self) -> Result<Vec<Symbol>, LowBalance> {
         if self.credits() < self.bet() {
             return Err(LowBalance);
@@ -209,5 +214,20 @@ mod test {
     #[test]
     fn game_validate_bet() {
         assert!(Game::validate_bet(1, 1, 10))
+    }
+
+    #[test]
+    fn game_validate_bet_bet_less_bet_min() {
+        assert!(! Game::validate_bet(1, 10, 100))
+    }
+
+    #[test]
+    fn game_validate_bet_bet_bigger_bet_max() {
+        assert!(! Game::validate_bet(11, 1, 10))
+    }
+
+    #[test]
+    fn game_validate_bet_bet_min_bigger_bet_max() {
+        assert!(! Game::validate_bet(10, 20, 10))
     }
 }
