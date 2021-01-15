@@ -6,9 +6,23 @@ use core::fmt;
 use rand::Rng;
 use serde_derive::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
+use std::error::Error;
 
 /// The range of numbers for which there are corresponding symbols.
 pub const RANGE: RangeInclusive<u32> = 0..=127;
+
+#[derive(Debug, Clone)]
+pub struct OutOfRange {
+    number: u32
+}
+
+impl Error for OutOfRange {}
+
+impl fmt::Display for OutOfRange {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Number {} is not in the range {}..={}", self.number, RANGE.start(), RANGE.end())
+    }
+}
 
 /// Symbols
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -40,24 +54,22 @@ impl Symbol {
     /// # Examples
     /// ```
     /// # use slot_machine::game::symbol::Symbol;
-    /// let symbol = Symbol::from_number(125);
+    /// let symbol = Symbol::from_number(125).unwrap();
     /// assert_eq!(Symbol::Seven, symbol)
     /// ```
-    pub fn from_number(number: u32) -> Symbol {
-        match number {
-            _n @ 0..=72 => Blank,
-            _n @ 73..=77 => Cherry,
-            _n @ 78..=93 => Bar,
-            _n @ 94..=106 => DoubleBar,
-            _n @ 107..=117 => TripleBar,
-            _n @ 118..=125 => Seven,
-            _n @ 126..=127 => Jackpot,
-            _ => panic!(
-                "The number is not in the range {}..={}!",
-                RANGE.start(),
-                RANGE.end()
-            ),
-        }
+    pub fn from_number(number: u32) -> Result<Symbol, OutOfRange> {
+        let symbol = match number {
+            0..=72 => Blank,
+            73..=77 => Cherry,
+            78..=93 => Bar,
+            94..=106 => DoubleBar,
+            107..=117 => TripleBar,
+            118..=125 => Seven,
+            126..=127 => Jackpot,
+            _ => return Err(OutOfRange{number}),
+        };
+
+        Ok(symbol)
     }
 
     /// Returns a random [`Symbol`]
@@ -72,7 +84,7 @@ impl Symbol {
         let uniform = Uniform::new_inclusive(RANGE.start(), RANGE.end());
         let number = rand::thread_rng().sample(uniform);
 
-        Symbol::from_number(number)
+        Symbol::from_number(number).unwrap()
     }
 }
 
@@ -82,49 +94,48 @@ mod test {
 
     #[test]
     fn blank_from_number() {
-        assert_eq!(Symbol::from_number(0), Symbol::Blank);
-        assert_eq!(Symbol::from_number(72), Symbol::Blank);
+        assert_eq!(Symbol::from_number(0).unwrap(), Symbol::Blank);
+        assert_eq!(Symbol::from_number(72).unwrap(), Symbol::Blank);
     }
 
     #[test]
     fn cherry_from_number() {
-        assert_eq!(Symbol::from_number(73), Symbol::Cherry);
-        assert_eq!(Symbol::from_number(77), Symbol::Cherry);
+        assert_eq!(Symbol::from_number(73).unwrap(), Symbol::Cherry);
+        assert_eq!(Symbol::from_number(77).unwrap(), Symbol::Cherry);
     }
 
     #[test]
     fn bar_from_number() {
-        assert_eq!(Symbol::from_number(78), Symbol::Bar);
-        assert_eq!(Symbol::from_number(93), Symbol::Bar);
+        assert_eq!(Symbol::from_number(78).unwrap(), Symbol::Bar);
+        assert_eq!(Symbol::from_number(93).unwrap(), Symbol::Bar);
     }
 
     #[test]
     fn double_bar_from_number() {
-        assert_eq!(Symbol::from_number(94), Symbol::DoubleBar);
-        assert_eq!(Symbol::from_number(106), Symbol::DoubleBar);
+        assert_eq!(Symbol::from_number(94).unwrap(), Symbol::DoubleBar);
+        assert_eq!(Symbol::from_number(106).unwrap(), Symbol::DoubleBar);
     }
 
     #[test]
     fn triple_bar_from_number() {
-        assert_eq!(Symbol::from_number(107), Symbol::TripleBar);
-        assert_eq!(Symbol::from_number(117), Symbol::TripleBar);
+        assert_eq!(Symbol::from_number(107).unwrap(), Symbol::TripleBar);
+        assert_eq!(Symbol::from_number(117).unwrap(), Symbol::TripleBar);
     }
 
     #[test]
     fn seven_from_number() {
-        assert_eq!(Symbol::from_number(118), Symbol::Seven);
-        assert_eq!(Symbol::from_number(125), Symbol::Seven);
+        assert_eq!(Symbol::from_number(118).unwrap(), Symbol::Seven);
+        assert_eq!(Symbol::from_number(125).unwrap(), Symbol::Seven);
     }
 
     #[test]
     fn jackpot_from_number() {
-        assert_eq!(Symbol::from_number(126), Symbol::Jackpot);
-        assert_eq!(Symbol::from_number(127), Symbol::Jackpot);
+        assert_eq!(Symbol::from_number(126).unwrap(), Symbol::Jackpot);
+        assert_eq!(Symbol::from_number(127).unwrap(), Symbol::Jackpot);
     }
 
     #[test]
-    #[should_panic]
     fn invalid_from_number() {
-        Symbol::from_number(128);
+        assert!(Symbol::from_number(128).is_err());
     }
 }
