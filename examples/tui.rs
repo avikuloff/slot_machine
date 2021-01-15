@@ -16,7 +16,6 @@ fn main() {
     println!("Bet size: {}", BET_SIZE);
     print_help();
 
-    //let bet = Bet::new(BET_SIZE, BET_MIN, BET_MAX);
     let mut game = Game::new(BALANCE, BET_SIZE, BET_MIN, BET_MAX).unwrap();
 
     loop {
@@ -47,7 +46,18 @@ fn main() {
                     spin(&mut game);
                     sleep(Duration::from_secs(1));
                 }
-            }
+            },
+            "PAYOUTS" => {
+                println!("3 Jackpot = x1666");
+                println!("3 Seven = x300");
+                println!("3 TripleBar = x100");
+                println!("3 DoubleBar = x50");
+                println!("3 Bar = x25");
+                println!("3 of any Bar = x12");
+                println!("3 Cherry = x12");
+                println!("2 Cherry = x6");
+                println!("1 Cherry = x3");
+            },
             "HELP" => print_help(),
             _ => println!("Invalid command!"),
         }
@@ -102,5 +112,6 @@ fn print_help() {
     println!("To get a balance, put the `balance`.");
     println!("To get a bet size, put the `bet`.");
     println!("To increase or decrease the size of the bet, put `bet plus` or `bet minus`.");
-    println!("To activate auto-spin, put `autospin <NUMBER>` where NUMBER is the number of spins.")
+    println!("To activate auto-spin, put `autospin <NUMBER>` where NUMBER is the number of spins.");
+    println!("To show the payout table, put `payouts`.");
 }
