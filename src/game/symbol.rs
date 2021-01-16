@@ -6,23 +6,9 @@ use core::fmt;
 use rand::Rng;
 use serde_derive::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
-use std::error::Error;
 
 /// The range of numbers for which there are corresponding symbols.
 pub const RANGE: RangeInclusive<u32> = 0..=127;
-
-#[derive(Debug, Clone)]
-pub struct OutOfRange {
-    number: u32
-}
-
-impl Error for OutOfRange {}
-
-impl fmt::Display for OutOfRange {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Number {} is not in the range {}..={}", self.number, RANGE.start(), RANGE.end())
-    }
-}
 
 /// Symbols
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -54,10 +40,11 @@ impl Symbol {
     /// # Examples
     /// ```
     /// # use slot_machine::game::symbol::Symbol;
-    /// let symbol = Symbol::from_number(125).unwrap();
-    /// assert_eq!(Symbol::Seven, symbol)
+    /// let symbol = Symbol::from_number(125);
+    ///
+    /// assert_eq!(symbol, Some(Symbol::Seven))
     /// ```
-    pub fn from_number(number: u32) -> Result<Symbol, OutOfRange> {
+    pub fn from_number(number: u32) -> Option<Self> {
         let symbol = match number {
             0..=72 => Blank,
             73..=77 => Cherry,
@@ -66,10 +53,10 @@ impl Symbol {
             107..=117 => TripleBar,
             118..=125 => Seven,
             126..=127 => Jackpot,
-            _ => return Err(OutOfRange{number}),
+            _ => return None,
         };
 
-        Ok(symbol)
+        Some(symbol)
     }
 
     /// Returns a random [`Symbol`]
@@ -136,9 +123,6 @@ mod test {
 
     #[test]
     fn from_number_assert_error() {
-        assert_eq!(
-            Symbol::from_number(128).unwrap_err().to_string(),
-            "Number 128 is not in the range 0..=127".to_owned()
-        );
+        assert_eq!(Symbol::from_number(128), None);
     }
 }
