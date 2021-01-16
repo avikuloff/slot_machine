@@ -31,11 +31,7 @@ impl Symbol {
 
     /// Searches for the corresponding [`Symbol`] in the range [`RANGE`] for `number`.
     ///
-    /// # Errors
-    ///
-    /// Returns [`OutOfRange`] if the `number` is not in the [`RANGE`].
-    ///
-    /// [`RANGE`]: ../symbol/constant.RANGE.html
+    /// Returns `None` if the `number` is not in the [`Symbol::RANGE`].
     ///
     /// # Examples
     /// ```

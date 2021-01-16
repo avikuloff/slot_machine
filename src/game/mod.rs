@@ -77,8 +77,12 @@ impl Game {
     ///
     /// Returns [`InvalidBet`] if bet_min > bet_max or bet < bet_min or bet > bet_max.
     pub fn new(credits: u32, bet: u32, bet_min: u32, bet_max: u32) -> Result<Self, InvalidBet> {
-        if ! Game::validate_bet(bet, bet_min, bet_max) {
-            return Err(InvalidBet {bet, bet_min, bet_max})
+        if !Game::validate_bet(bet, bet_min, bet_max) {
+            return Err(InvalidBet {
+                bet,
+                bet_min,
+                bet_max,
+            });
         }
 
         Ok(Game {
@@ -96,11 +100,15 @@ impl Game {
     ///
     /// Returns [`InvalidBet`] if bet < [`Game::bet_min`] or bet > [`Game::bet_max`].
     pub fn set_bet(&mut self, bet: u32) -> Result<(), InvalidBet> {
-        if ! Game::validate_bet(bet, self.bet_min, self.bet_max) {
+        if !Game::validate_bet(bet, self.bet_min, self.bet_max) {
             let bet_min = self.bet_min;
             let bet_max = self.bet_max;
 
-            return Err(InvalidBet {bet, bet_min, bet_max})
+            return Err(InvalidBet {
+                bet,
+                bet_min,
+                bet_max,
+            });
         }
 
         self.bet = bet;
@@ -200,7 +208,13 @@ mod test {
         let bet_max = 10;
 
         assert_eq!(
-            Game {credits, bet, bet_min, bet_max, win: 0},
+            Game {
+                credits,
+                bet,
+                bet_min,
+                bet_max,
+                win: 0
+            },
             Game::new(credits, bet, bet_min, bet_max).unwrap()
         )
     }
@@ -219,16 +233,16 @@ mod test {
 
     #[test]
     fn game_validate_bet_bet_less_bet_min() {
-        assert!(! Game::validate_bet(1, 10, 100))
+        assert!(!Game::validate_bet(1, 10, 100))
     }
 
     #[test]
     fn game_validate_bet_bet_bigger_bet_max() {
-        assert!(! Game::validate_bet(11, 1, 10))
+        assert!(!Game::validate_bet(11, 1, 10))
     }
 
     #[test]
     fn game_validate_bet_bet_min_bigger_bet_max() {
-        assert!(! Game::validate_bet(10, 20, 10))
+        assert!(!Game::validate_bet(10, 20, 10))
     }
 }
