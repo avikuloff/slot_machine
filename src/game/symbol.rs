@@ -7,9 +7,6 @@ use rand::Rng;
 use serde_derive::{Deserialize, Serialize};
 use std::ops::RangeInclusive;
 
-/// The range of numbers for which there are corresponding symbols.
-pub const RANGE: RangeInclusive<u32> = 0..=127;
-
 /// Symbols
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Symbol {
@@ -29,6 +26,9 @@ impl fmt::Display for Symbol {
 }
 
 impl Symbol {
+    /// The range of numbers for which there are corresponding symbols.
+    pub const RANGE: RangeInclusive<u32> = 0..=127;
+
     /// Searches for the corresponding [`Symbol`] in the range [`RANGE`] for `number`.
     ///
     /// # Errors
@@ -68,7 +68,7 @@ impl Symbol {
     /// let symbol = Symbol::random();
     /// ```
     pub fn random() -> Symbol {
-        let uniform = Uniform::new_inclusive(RANGE.start(), RANGE.end());
+        let uniform = Uniform::new_inclusive(Self::RANGE.start(), Self::RANGE.end());
         let number = rand::thread_rng().sample(uniform);
 
         Symbol::from_number(number).unwrap()
