@@ -5,22 +5,25 @@ use crate::game::symbol::Symbol::*;
 use core::fmt;
 use rand::Rng;
 use serde_derive::{Deserialize, Serialize};
-use std::ops::RangeInclusive;
 use std::error::Error;
-
-/// The range of numbers for which there are corresponding symbols.
-pub const RANGE: RangeInclusive<u32> = 0..=127;
+use std::ops::RangeInclusive;
 
 #[derive(Debug, Clone)]
 pub struct OutOfRange {
-    number: u32
+    number: u32,
 }
 
 impl Error for OutOfRange {}
 
 impl fmt::Display for OutOfRange {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "Number {} is not in the range {}..={}", self.number, RANGE.start(), RANGE.end())
+        write!(
+            f,
+            "Number {} is not in the range {}..={}",
+            self.number,
+            Symbol::RANGE.start(),
+            Symbol::RANGE.end()
+        )
     }
 }
 
@@ -43,6 +46,9 @@ impl fmt::Display for Symbol {
 }
 
 impl Symbol {
+    /// The range of numbers for which there are corresponding symbols.
+    pub const RANGE: RangeInclusive<u32> = 0..=127;
+
     /// Searches for the corresponding [`Symbol`] in the range [`RANGE`] for `number`.
     ///
     /// # Errors
@@ -66,7 +72,7 @@ impl Symbol {
             107..=117 => TripleBar,
             118..=125 => Seven,
             126..=127 => Jackpot,
-            _ => return Err(OutOfRange{number}),
+            _ => return Err(OutOfRange { number }),
         };
 
         Ok(symbol)
@@ -81,7 +87,7 @@ impl Symbol {
     /// let symbol = Symbol::random();
     /// ```
     pub fn random() -> Symbol {
-        let uniform = Uniform::new_inclusive(RANGE.start(), RANGE.end());
+        let uniform = Uniform::new_inclusive(Self::RANGE.start(), Self::RANGE.end());
         let number = rand::thread_rng().sample(uniform);
 
         Symbol::from_number(number).unwrap()

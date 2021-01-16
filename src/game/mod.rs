@@ -149,7 +149,8 @@ impl Game {
     /// let mut game = Game::new(1000, 1, 1, 100).unwrap();
     /// game.spin().unwrap();
     ///
-    /// assert_eq!(game.credits(), game.credits() + game.win());
+    /// // The new value of credits equals `old_value_of_credits - bet_size + winning`
+    /// assert_eq!(game.credits(), 1000 - 1 + game.win());
     /// ```
     ///
     /// [`credits`]: #method.credits

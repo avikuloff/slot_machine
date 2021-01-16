@@ -46,7 +46,7 @@ fn main() {
                     spin(&mut game);
                     sleep(Duration::from_secs(1));
                 }
-            },
+            }
             "PAYOUTS" => {
                 println!("3 Jackpot = x1666");
                 println!("3 Seven = x300");
@@ -57,7 +57,7 @@ fn main() {
                 println!("3 Cherry = x12");
                 println!("2 Cherry = x6");
                 println!("1 Cherry = x3");
-            },
+            }
             "HELP" => print_help(),
             _ => println!("Invalid command!"),
         }
